@@ -6,15 +6,14 @@ from ui_fcalc import Ui_MainWindow
 
 
 class Calc(QMainWindow, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
         self.setupUi(self)
         #uic.loadUi('fcalc.ui', self)
         self.le_focus = self.le_func
-        self.initUI()
+        self.initUI(app)
 
-    def initUI(self):
-        #цвет на кнопках установил
+    def initUI(self, app):
         self.btn_eq.setStyleSheet("background-color: orange")
         self.btn_del.setStyleSheet("background-color: #1560BD")
         self.btn_ac.setStyleSheet("background-color: #1560BD")
@@ -95,27 +94,23 @@ class Calc(QMainWindow, Ui_MainWindow):
         string = self.le_func.text()
         if "x" in string:
             x = self.le_x.text()
-            if "x" in x:
-                result = "error"
-            else:
-                if not is_digit(x):
-                    x = calculate(x)
-                    if not is_digit(str(x)):
-                        result = "error"
-                    else:
-                        result = calculate(string, x)
-                else:
-                    result = calculate(string, float(x))
+            result = calculate(string, x)
         else:
             result = calculate(string)
+        result = "error" if result is None else result
         self.lbl_result.setText(str(result)+" ")
         self.le_func.setFocus()
 
 
+def except_hook(cls, exception, traceback):
+    sys.__excepthook__(cls, exception, traceback)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    calc = Calc()
+    calc = Calc(app)
     calc.show()
+    sys.excepthook = except_hook
     sys.exit(app.exec())
 
 

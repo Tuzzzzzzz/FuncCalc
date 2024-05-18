@@ -13,10 +13,10 @@ func_dict = {
     "+": lambda a, b: a+b,
     "-": lambda a, b: a-b,
     "*": lambda a, b: a*b,
-    "/": lambda a, b: a/b if b != 0 else None,
+    "/": lambda a, b: a/b,
     "^": lambda a, b: a**b,
     "~": lambda a: -a,
-    "sqrt": lambda a: sqrt(a),
+    "sqrt": sqrt,
     "sin": sin,
     "cos": cos,
     "tg": lambda a: None if (a / (pi/2)) % 2 == 1 else tan(a),
@@ -126,14 +126,19 @@ def str_arr_to_rpn_arr(str_arr):
 
 
 def operation(el, *args):
-    try:
-        return func_dict[el](*args)
-    except:
-        return None
+    return func_dict[el](*args)
 
 
+def exception(func):
+    def new_func(*args):
+        try:
+            return func(*args)
+        except:
+            return None
+    return new_func
+
+@exception
 def rpn_arr_to_result(rpn_arr, x):
-    fl = True
     stack = deque()
     for el in rpn_arr:
         if el == "x":
@@ -149,31 +154,17 @@ def rpn_arr_to_result(rpn_arr, x):
             stack.append(el)
 
         elif el in op_set:
-            if len(stack) == 0:
-                return None
             b = float(stack.pop())
-
-            if len(stack) == 0:
-                return None
             a = float(stack.pop())
-
             new_el = operation(el, a, b)
-            if new_el is None:
-                fl = False
-                break
             stack.append(new_el)
 
         elif el in pref_op_set:
-            if len(stack) == 0:
-                return None
             a = float(stack.pop())
-
             new_el = operation(el, a)
-            if new_el is None:
-                fl = False
-                break
             stack.append(new_el)
-    if (not fl) or len(stack) != 1 or (type(stack[0]) == float and type(stack[0]) == int):
+
+    if len(stack) != 1:
         return None
     res = float(stack[0])
     if abs(res) < 1e-9:
@@ -182,16 +173,15 @@ def rpn_arr_to_result(rpn_arr, x):
 
 
 def calculate(string, x=None):
+    if x is None and "x" in string:
+        return None
     str_arr = str_to_str_arr(string)
     if not validation(str_arr):
-        return "error"
+        return None
     rpn_arr = str_arr_to_rpn_arr(str_arr)
     if rpn_arr is None:
-        return "error"
-    result = rpn_arr_to_result(rpn_arr, x)
-    if result is None:
-        return "error"
-    return result
+        return None
+    return rpn_arr_to_result(rpn_arr, x)
 
 
 if __name__ == "__main__":
@@ -199,10 +189,7 @@ if __name__ == "__main__":
         string = input("input string: ")
         if "x" in string:
             x = input("input x: ")
-            if "x" in x:
-                result = "error"
-            else:
-                result = calculate(string, calculate(x))
+            result = calculate(string, calculate(x))
         else:
             result = calculate(string)
         print(f"result: {result}\n")
