@@ -1,6 +1,5 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow
-#from PyQt5 import uic
 from RPN import is_digit, calculate
 from ui_fcalc import Ui_MainWindow
 
@@ -9,7 +8,6 @@ class Calc(QMainWindow, Ui_MainWindow):
     def __init__(self, app):
         super().__init__()
         self.setupUi(self)
-        #uic.loadUi('fcalc.ui', self)
         self.le_focus = self.le_func
         self.initUI(app)
 
@@ -49,7 +47,7 @@ class Calc(QMainWindow, Ui_MainWindow):
         self.btn_actg.clicked.connect(self.input)
         self.btn_br1.clicked.connect(self.input)
         self.btn_br2.clicked.connect(self.input)
-        self.btn_log2.clicked.connect(self.input)
+        self.btn_log.clicked.connect(self.input)
         self.btn_ex.clicked.connect(self.input)
         self.btn_lg.clicked.connect(self.input)
         self.btn_mult.clicked.connect(self.input)
@@ -94,10 +92,14 @@ class Calc(QMainWindow, Ui_MainWindow):
         string = self.le_func.text()
         if "x" in string:
             x = self.le_x.text()
-            result = calculate(string, x)
+            if is_digit(x) or x == "pi" or x == "e":
+                result = calculate(string, x)
+            else:
+                result = calculate(string, calculate(x))
         else:
             result = calculate(string)
-        result = "error" if result is None else result
+        if result is None:
+            result = "error"
         self.lbl_result.setText(str(result)+" ")
         self.le_func.setFocus()
 
