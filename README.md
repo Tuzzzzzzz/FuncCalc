@@ -1,1 +1,1 @@
-Calculator with math function
+Calculator with math functions
